@@ -195,7 +195,9 @@ header.scrolled {
   background: var(--grad);
   font-family: var(--font-display); font-weight: 700; font-size: 16px; color: #05060A;
   box-shadow: 0 0 24px rgba(139, 92, 246, 0.55);
+  transition: transform 0.45s var(--ease), box-shadow 0.45s;
 }
+.logo:hover .logo-mark { transform: rotate(-10deg) scale(1.08); box-shadow: 0 0 36px rgba(139, 92, 246, 0.85); }
 .logo-name { font-family: var(--font-display); font-weight: 600; font-size: 15px; letter-spacing: 0.02em; }
 .logo-name small { display: block; font-family: var(--font-mono); font-size: 10px; color: var(--muted); font-weight: 400; letter-spacing: 0.22em; }
 
@@ -293,16 +295,34 @@ header.scrolled {
   display: inline-flex; align-items: center; gap: 10px;
   font-weight: 600; font-size: 14.5px; letter-spacing: 0.01em;
   padding: 14px 26px; border-radius: 999px;
-  transition: transform 0.3s var(--ease), box-shadow 0.3s, background 0.3s, border-color 0.3s;
+  transition: transform 0.3s var(--ease), box-shadow 0.3s, background 0.3s, border-color 0.3s, filter 0.3s;
   border: 1px solid transparent;
+  position: relative; overflow: hidden; isolation: isolate;
+  will-change: transform;
 }
+.btn::after {
+  content: ""; position: absolute; top: -20%; bottom: -20%; left: -75%;
+  width: 45%; z-index: -1;
+  background: linear-gradient(115deg, transparent, rgba(255, 255, 255, 0.32), transparent);
+  transform: skewX(-20deg) translateX(0);
+  transition: transform 0.9s var(--ease);
+  pointer-events: none;
+}
+.btn:hover::after { transform: skewX(-20deg) translateX(520%); }
+.btn:active { transform: scale(0.96); }
+.btn svg.nudge { transition: transform 0.35s var(--ease); }
+.btn:hover svg.nudge { transform: translateX(5px); }
 .btn-primary {
   background: var(--grad); color: #05060A;
-  box-shadow: 0 12px 34px rgba(139, 92, 246, 0.4);
+  animation: glowPulse 3.2s ease-in-out infinite;
 }
-.btn-primary:hover { transform: translateY(-3px); box-shadow: 0 18px 44px rgba(139, 92, 246, 0.55); }
+.btn-primary:hover { filter: brightness(1.08); }
+@keyframes glowPulse {
+  0%, 100% { box-shadow: 0 12px 34px rgba(139, 92, 246, 0.4); }
+  50% { box-shadow: 0 14px 50px rgba(139, 92, 246, 0.62), 0 0 26px rgba(34, 211, 238, 0.28); }
+}
 .btn-ghost { border-color: var(--border-hi); color: var(--text); background: rgba(255,255,255,0.02); }
-.btn-ghost:hover { transform: translateY(-3px); border-color: var(--cyan); color: var(--cyan); }
+.btn-ghost:hover { border-color: var(--cyan); color: var(--cyan); }
 
 .hero-social { display: flex; align-items: center; gap: 12px; }
 .social-link {
@@ -310,9 +330,12 @@ header.scrolled {
   display: grid; place-items: center;
   border: 1px solid var(--border); color: var(--muted);
   transition: all 0.3s var(--ease);
+  position: relative; overflow: hidden; isolation: isolate;
+  will-change: transform;
 }
-.social-link svg { width: 19px; height: 19px; }
-.social-link:hover { transform: translateY(-4px); border-color: var(--violet); color: var(--violet); box-shadow: 0 10px 26px rgba(139, 92, 246, 0.3); }
+.social-link svg { width: 19px; height: 19px; transition: transform 0.3s var(--ease); }
+.social-link:hover { border-color: var(--violet); color: var(--violet); box-shadow: 0 10px 26px rgba(139, 92, 246, 0.3); }
+.social-link:hover svg { transform: scale(1.18) rotate(-6deg); }
 
 /* hero code card */
 .hero-visual { position: relative; min-width: 0; }
@@ -433,6 +456,8 @@ section { padding: clamp(72px, 10vw, 120px) clamp(20px, 5vw, 56px); position: re
   display: flex; align-items: center; gap: 12px;
 }
 .section-kicker::before { content: ""; width: 30px; height: 1px; background: var(--cyan); }
+html.js .section-kicker::before { width: 0; transition: width 0.9s var(--ease) 0.35s; }
+html.js .reveal.in .section-kicker::before { width: 30px; }
 .section-title {
   font-family: var(--font-display); font-weight: 700;
   font-size: clamp(30px, 4.6vw, 52px); line-height: 1.1;
@@ -445,6 +470,7 @@ section { padding: clamp(72px, 10vw, 120px) clamp(20px, 5vw, 56px); position: re
 @media (prefers-reduced-motion: reduce) {
   .reveal { opacity: 1; transform: none; transition: none; }
   .marquee-track, .aurora .blob, .float-chip { animation: none !important; }
+  .hl-in, .hero-left > *, .hero-visual, .section-kicker::before { transition: none !important; }
 }
 
 /* ============================================================
@@ -742,6 +768,94 @@ footer {
 .to-top svg { width: 18px; height: 18px; }
 
 /* ============================================================
+   PREMIUM MICRO-INTERACTIONS
+   ============================================================ */
+/* hero entrance — staggered rise after preloader */
+html.js .hero-left > *, html.js .hero-visual {
+  opacity: 0; transform: translateY(28px);
+  transition: opacity 0.9s var(--ease), transform 0.9s var(--ease);
+}
+html.js body.loaded .hero-left > *, html.js body.loaded .hero-visual { opacity: 1; transform: none; }
+html.js .hero-left > :nth-child(1) { transition-delay: 0.12s; }
+html.js .hero-left > :nth-child(2) { transition-delay: 0.2s; }
+html.js .hero-left > :nth-child(3) { transition-delay: 0.32s; }
+html.js .hero-left > :nth-child(4) { transition-delay: 0.44s; }
+html.js .hero-left > :nth-child(5) { transition-delay: 0.56s; }
+html.js .hero-left > :nth-child(6) { transition-delay: 0.68s; }
+html.js .hero-visual { transition-delay: 0.32s !important; }
+
+/* headline line-clip reveal */
+.hl { display: block; overflow: hidden; padding-bottom: 0.12em; margin-bottom: -0.12em; }
+.hl-in { display: inline-block; transform: translateY(115%); transition: transform 1.1s var(--ease); }
+html.js body.loaded .hl:nth-child(1) .hl-in { transform: none; transition-delay: 0.22s; }
+html.js body.loaded .hl:nth-child(2) .hl-in { transform: none; transition-delay: 0.34s; }
+
+/* terminal caret */
+.hero-sub .chev { display: inline-block; animation: caretBlink 1.2s steps(2, start) infinite; }
+@keyframes caretBlink { 50% { opacity: 0; } }
+
+/* floating phone */
+.phone { animation: floaty 6s ease-in-out infinite; }
+@keyframes floaty { 50% { transform: translateY(-10px); } }
+
+/* click ripple */
+.ripple {
+  position: absolute; border-radius: 50%; z-index: -1;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.55), rgba(255, 255, 255, 0.18) 55%, transparent 75%);
+  transform: scale(0);
+  animation: rippleAnim 0.75s var(--ease) forwards;
+  pointer-events: none;
+}
+@keyframes rippleAnim { to { transform: scale(2.8); opacity: 0; } }
+
+/* glow orb cursor (fine pointers only) */
+.orb {
+  position: fixed; top: 0; left: 0; z-index: 900;
+  width: 34px; height: 34px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(139, 92, 246, 0.28), rgba(34, 211, 238, 0.1) 55%, transparent 75%);
+  filter: blur(2px);
+  pointer-events: none; mix-blend-mode: screen;
+  opacity: 0; transform: translate(-100px, -100px) scale(0.6);
+  transition: transform 0.6s ease-out, opacity 0.5s;
+  will-change: transform;
+}
+.orb.on { opacity: 1; }
+.orb.grow { transform: translate(-100px, -100px) scale(1.9); }
+@media (pointer: coarse) { .orb { display: none; } }
+
+/* card sheen sweep */
+.sheen { position: relative; overflow: hidden; }
+.sheen::before {
+  content: ""; position: absolute; top: -25%; bottom: -25%; left: -75%;
+  width: 45%; z-index: 1;
+  background: linear-gradient(115deg, transparent, rgba(255, 255, 255, 0.055), transparent);
+  transform: skewX(-20deg) translateX(0);
+  transition: transform 0.9s var(--ease);
+  pointer-events: none;
+}
+.sheen:hover::before { transform: skewX(-20deg) translateX(540%); }
+
+/* stat number glow */
+.stat-card:hover .stat-num { filter: drop-shadow(0 0 16px rgba(139, 92, 246, 0.5)); }
+
+/* chip hover glow */
+.chip:hover { box-shadow: 0 8px 22px rgba(34, 211, 238, 0.22); }
+
+/* footer link underline */
+.foot-links a { position: relative; }
+.foot-links a::after {
+  content: ""; position: absolute; left: 0; bottom: -2px; height: 1px; width: 0;
+  background: var(--cyan); transition: width 0.3s var(--ease);
+}
+.foot-links a:hover::after { width: 100%; }
+
+@media (prefers-reduced-motion: reduce) {
+  .btn-primary, .phone, .hero-sub .chev { animation: none !important; }
+  .btn::after, .sheen::before { transition: none; }
+  .orb { display: none; }
+}
+
+/* ============================================================
    RESPONSIVE
    ============================================================ */
 @media (max-width: 1024px) {
@@ -768,6 +882,13 @@ footer {
   .contact-actions .btn { justify-content: center; }
 }
 </style>
+<noscript>
+  <style>
+    .preloader { display: none; }
+    .reveal, .hl-in, .hero-left > *, .hero-visual { opacity: 1 !important; transform: none !important; }
+    .section-kicker::before { width: 30px !important; }
+  </style>
+</noscript>
 </head>
 
 <body>
@@ -840,7 +961,7 @@ footer {
     <div class="hero-inner">
       <div class="hero-left">
         <div class="eyebrow">Hi there, I am</div>
-        <h1>Mouhcine<br><span class="grad-text">Fadoul.</span></h1>
+        <h1><span class="hl"><span class="hl-in">Mouhcine</span></span><span class="hl"><span class="hl-in grad-text">Fadoul.</span></span></h1>
         <p class="hero-sub"><span class="chev">❯</span> flutter &amp; dart <span class="attr">@developer</span> · cisco ccna <span class="attr">@network-technician</span></p>
         <p class="hero-desc">
           Self-taught mobile engineer from <strong>Casablanca, Morocco</strong> — I build
@@ -850,7 +971,7 @@ footer {
         </p>
         <div class="hero-cta">
           <a class="btn btn-primary" href="#work">Explore my work
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+            <svg class="nudge" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
           </a>
           <a class="btn btn-ghost" href="#contact">Let's talk</a>
         </div>
@@ -967,19 +1088,19 @@ footer {
       </div>
 
       <div class="stats-grid">
-        <div class="stat-card reveal" style="--d:0s">
+        <div class="stat-card sheen reveal" style="--d:0s">
           <div class="stat-num"><span class="count" data-target="1">0</span></div>
           <div class="stat-label">Flagship app shipped</div>
         </div>
-        <div class="stat-card reveal" style="--d:.08s">
+        <div class="stat-card sheen reveal" style="--d:.08s">
           <div class="stat-num"><span class="count" data-target="4">0</span></div>
           <div class="stat-label">Cisco CCNA certs</div>
         </div>
-        <div class="stat-card reveal" style="--d:.16s">
+        <div class="stat-card sheen reveal" style="--d:.16s">
           <div class="stat-num"><span class="count" data-target="3">0</span></div>
           <div class="stat-label">Languages spoken</div>
         </div>
-        <div class="stat-card reveal" style="--d:.24s">
+        <div class="stat-card sheen reveal" style="--d:.24s">
           <div class="stat-num"><span class="count" data-target="0" data-suffix="%">0</span></div>
           <div class="stat-label">Data collected</div>
         </div>
@@ -996,7 +1117,7 @@ footer {
       </div>
 
       <div class="skills-grid">
-        <div class="skill-card reveal" style="--d:0s">
+        <div class="skill-card sheen reveal" style="--d:0s">
           <div class="skill-top">
             <div class="skill-ic dev">🧩</div>
             <div class="skill-name">Development<small>Flutter · Dart</small></div>
@@ -1021,7 +1142,7 @@ footer {
           </ul>
         </div>
 
-        <div class="skill-card net reveal" style="--d:.1s">
+        <div class="skill-card net sheen reveal" style="--d:.1s">
           <div class="skill-top">
             <div class="skill-ic net">🌐</div>
             <div class="skill-name">Networking &amp; IT<small>Infrastructure</small></div>
@@ -1038,7 +1159,7 @@ footer {
           </div>
         </div>
 
-        <div class="skill-card lang reveal" style="--d:.2s">
+        <div class="skill-card lang sheen reveal" style="--d:.2s">
           <div class="skill-top">
             <div class="skill-ic lang">🗣</div>
             <div class="skill-name">Languages<small>Let's talk</small></div>
@@ -1071,7 +1192,7 @@ footer {
       </div>
 
       <div class="projects-grid">
-        <article class="featured reveal" style="--d:0s" id="featuredCard">
+        <article class="featured sheen reveal" style="--d:0s" id="featuredCard">
           <div class="device-zone">
             <div class="orbit"></div>
             <div class="orbit orbit-2"></div>
@@ -1119,7 +1240,7 @@ footer {
           </div>
         </article>
 
-        <div class="card-mini reveal" style="--d:.08s">
+        <div class="card-mini sheen reveal" style="--d:.08s">
           <div class="m-ic gh">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M12 .5C5.65.5.5 5.65.5 12c0 5.08 3.29 9.39 7.86 10.91.58.11.79-.25.79-.55 0-.27-.01-1.17-.02-2.12-3.2.7-3.88-1.36-3.88-1.36-.52-1.33-1.28-1.68-1.28-1.68-1.04-.71.08-.7.08-.7 1.15.08 1.76 1.18 1.76 1.18 1.03 1.75 2.69 1.25 3.34.95.1-.74.4-1.25.72-1.54-2.55-.29-5.24-1.28-5.24-5.68 0-1.26.45-2.28 1.18-3.09-.12-.29-.51-1.46.11-3.05 0 0 .96-.31 3.15 1.18a10.9 10.9 0 0 1 5.74 0c2.18-1.49 3.14-1.18 3.14-1.18.63 1.59.23 2.76.11 3.05.74.81 1.18 1.83 1.18 3.09 0 4.42-2.69 5.39-5.26 5.67.41.36.78 1.06.78 2.14 0 1.54-.01 2.78-.01 3.16 0 .3.2.67.8.55A11.51 11.51 0 0 0 23.5 12C23.5 5.65 18.35.5 12 .5z"/></svg>
           </div>
@@ -1128,7 +1249,7 @@ footer {
           <a class="go" href="https://github.com/fadoulmouhcine" target="_blank" rel="noopener">VISIT PROFILE →</a>
         </div>
 
-        <div class="card-mini reveal" style="--d:.16s">
+        <div class="card-mini sheen reveal" style="--d:.16s">
           <div class="m-ic shop">🛡️</div>
           <h4>Privacy Policy</h4>
           <p>Muslim Platform is transparent by design — read exactly what the app knows (spoiler: nothing).</p>
@@ -1150,7 +1271,7 @@ footer {
         </p>
         <div class="contact-actions">
           <a class="btn btn-primary" href="mailto:fadoulmouhcine@gmail.com">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="3"/><path d="m2 7 10 7 10-7"/></svg>
+            <svg class="nudge" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="3"/><path d="m2 7 10 7 10-7"/></svg>
             fadoulmouhcine@gmail.com
           </a>
           <a class="btn btn-ghost" href="https://github.com/fadoulmouhcine" target="_blank" rel="noopener">
@@ -1184,6 +1305,7 @@ footer {
 <script>
 (function () {
   "use strict";
+  document.documentElement.classList.add("js");
   var reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
   /* ============ PRELOADER ============ */
@@ -1198,9 +1320,11 @@ footer {
     done = true;
     preloader.classList.add("done");
     document.body.style.overflow = "";
+    document.body.classList.add("loaded");
     initReveals();
     initCounters();
     initBars();
+    initMicros();
   }
 
   var tick;
@@ -1373,6 +1497,66 @@ footer {
   }
   makeTilt(card, 7);
   makeTilt(featured, 3.5);
+
+  /* ============ MICRO-INTERACTIONS ============ */
+  function initMicros() {
+    var fine = window.matchMedia("(pointer: fine)").matches;
+
+    if (fine && !reduceMotion) {
+      /* magnetic buttons */
+      var magnetic = document.querySelectorAll(".btn, .social-link");
+      magnetic.forEach(function (el) {
+        el.addEventListener("mousemove", function (ev) {
+          var r = el.getBoundingClientRect();
+          var x = (ev.clientX - r.left - r.width / 2) * 0.22;
+          var y = (ev.clientY - r.top - r.height / 2) * 0.22;
+          el.style.transform = "translate3d(" + x.toFixed(1) + "px, " + y.toFixed(1) + "px, 0)";
+        });
+        el.addEventListener("mouseleave", function () { el.style.transform = ""; });
+      });
+
+      /* glow orb cursor */
+      var orb = document.createElement("div");
+      orb.className = "orb";
+      document.body.appendChild(orb);
+      var ox = -100, oy = -100, tx = -100, ty = -100, raf = null;
+      document.addEventListener("mousemove", function (ev) {
+        tx = ev.clientX; ty = ev.clientY;
+        if (!raf) {
+          raf = requestAnimationFrame(function loop() {
+            ox += (tx - ox) * 0.16;
+            oy += (ty - oy) * 0.16;
+            orb.style.transform = "translate(" + (ox - 17) + "px, " + (oy - 17) + "px)";
+            raf = requestAnimationFrame(loop);
+          });
+        }
+      }, { passive: true });
+      document.addEventListener("mouseover", function (ev) {
+        orb.classList.toggle("on", ev.target.closest("a, button, .chip, .logo") !== null);
+        orb.classList.toggle("grow", ev.target.closest("a, button, .chip, .logo") !== null);
+      });
+      document.addEventListener("mouseout", function (ev) {
+        if (ev.target.closest("a, button, .chip, .logo")) {
+          orb.classList.remove("on", "grow");
+        }
+      });
+    }
+
+    /* click ripple */
+    document.addEventListener("click", function (ev) {
+      var host = ev.target.closest(".btn, .social-link");
+      if (!host || reduceMotion) return;
+      var r = host.getBoundingClientRect();
+      var size = Math.max(r.width, r.height) * 1.4;
+      var rip = document.createElement("span");
+      rip.className = "ripple";
+      rip.style.width = rip.style.height = size + "px";
+      rip.style.left = (ev.clientX - r.left - size / 2) + "px";
+      rip.style.top = (ev.clientY - r.top - size / 2) + "px";
+      host.appendChild(rip);
+      rip.addEventListener("animationend", function () { rip.remove(); });
+    });
+  }
 })();
 </script>
 </body>
